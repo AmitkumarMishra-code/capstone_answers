@@ -3,3 +3,7 @@ export const LOG_IN_SUCCESSFUL = 'LOG_IN_SUCCESSFUL';
 export const LOG_IN_UNSUCCESSFUL = 'LOG_IN_UNSUCCESSFUL';
 export const LOGOUT_USER = 'LOGOUT_USER';
 export const SET_USER = 'SET_USER'; //Persistence
+
+export const IS_SUBMITTING = 'IS_SUBMITTING';
+export const SUBMIT_SUCCESSFUL = 'SUBMIT_SUCCESSFUL';
+export const SUBMIT_ERROR = 'SUBMIT_ERROR';
