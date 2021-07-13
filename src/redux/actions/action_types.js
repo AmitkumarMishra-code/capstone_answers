@@ -7,3 +7,7 @@ export const SET_USER = 'SET_USER'; //Persistence
 export const IS_SUBMITTING = 'IS_SUBMITTING';
 export const SUBMIT_SUCCESSFUL = 'SUBMIT_SUCCESSFUL';
 export const SUBMIT_ERROR = 'SUBMIT_ERROR';
+export const RESET_STUDENTS = 'RESET_STUDENTS';
+
+export const RESET_SESSION = 'RESET_SESSION';
+export const SET_SESSION = 'SET_SESSION';

@@ -1,4 +1,4 @@
-import { Avatar, Button, Typography, makeStyles, Paper, Fab, TextField } from "@material-ui/core"
+import { Avatar, Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
 import AccountCircleSharpIcon from '@material-ui/icons/AccountCircleSharp'
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -26,8 +26,33 @@ const useStyles = makeStyles({
     submitDiv: {
         width: '50%',
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-start',
         alignItems: 'center',
+        gap: '50px',
+    },
+    allStudents: {
+        width: '100%',
+        display: 'flex',
+        flexWrap: 'wrap',
+        padding: '25px',
+        gap: '2rem',
+    },
+    student: {
+        display: 'flex',
+        flexDirection: 'column',
+        width: '30%',
+        gap: '1rem',
+    },
+    studentTextArea: {
+        outline: '#4456b7',
+    },
+    alignLeft: {
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        gap: '1rem',
+        padding: '25px',
     },
 });
 
@@ -36,6 +61,7 @@ export default function Main() {
     const dispatch = useDispatch()
     const user = useSelector(state => state.user)
     const students = useSelector(state => state.studentsList)
+    const sessionId = useSelector(state => state.session)
     const listRef = useRef()
 
     useEffect(() => {
@@ -68,7 +94,13 @@ export default function Main() {
             return
         }
         let studentNames = listRef.current.value.split(/[,\n]/g)
-        studentNames = studentNames.map(name => name.trim())
+        studentNames = studentNames.map(name => {
+            let newName = name.trim()
+            if (newName.length) {
+                newName = newName[0].toUpperCase() + newName.substring(1)
+            }
+            return newName
+        }).filter(name => name.length > 0)
         console.log(studentNames)
         let studentNameSet = new Set(studentNames)
         if (studentNameSet.size !== studentNames.length) {
@@ -104,27 +136,57 @@ export default function Main() {
                     <Fab onClick={logoutHandler} className={classes.floating}>
                         <img src={user.user.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
                     </Fab>
-                    <Typography variant='h2' component='h2'>My Students</Typography>
-                    <Typography variant='h6' component='h6'>Enter the name of each person who will answer your questions, separated by comma, or new line</Typography>
-                    <TextField
-                        variant="outlined"
-                        multiline rows='10'
-                        color='primary'
-                        placeholder='e.g. Amit, Francis, Andrew, Nithya'
-                        inputRef={listRef}
-                        style={{ width: '50%' }}
-                    />
-                    <Paper elevation={0} className={classes.submitDiv}>
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            onClick={submitHandler}
-                        >
-                            Submit
-                        </Button>
-                        <Typography variant='h6' component='h6'>{students.isSubmitting ? 'Submitting...' : students.error ? students.error : ''}</Typography>
-                    </Paper>
+                    {
+                        !sessionId ?
+                            <>
+                                <Paper elevation={0} className={classes.alignLeft}>
+                                    <Typography variant='h2' component='h2'>My Students</Typography>
+                                    <Typography variant='h6' component='h6'>Enter the name of each person who will answer your questions, separated by comma, or new line</Typography>
+                                    <TextField
+                                        variant="outlined"
+                                        multiline rows='15'
+                                        color='primary'
+                                        placeholder='e.g. Amit, Francis, Andrew, Nithya'
+                                        inputRef={listRef}
+                                        style={{ width: '100%' }}
+                                    />
+                                    <Paper elevation={0} className={classes.submitDiv}>
+                                        <Button
+                                            color='primary'
+                                            variant='contained'
+                                            onClick={submitHandler}
+                                        >
+                                            Submit
+                                        </Button>
+                                        <Typography variant='h6' component='h6'>{students.isSubmitting ? 'Submitting...' : students.error ? students.error : ''}</Typography>
+                                    </Paper>
+                                </Paper>
+                            </> :
+                            <>
+                                <Paper elevation={0} className={classes.alignLeft}>
+
+                                    <Typography variant='h2' component='h2' >Dashboard</Typography>
+                                    <Typography variant='subtitle1' component='p'>Students Link: <Link target="_blank" rel="noreferrer noopener" href={`${window.location.href}${sessionId}`}>{window.location.href}{sessionId}</Link></Typography>
+                                    <Paper className={classes.allStudents} elevation={0}>
+                                        {students.list.map((student, index) =>
+                                            <Paper className={classes.student} elevation={0} key={index}>
+                                                <Typography style={{ color: '#4456b7' }}>{student}</Typography>
+                                                <TextField
+                                                    className={classes.studentTextArea}
+                                                    variant="outlined"
+                                                    multiline
+                                                    rows='5'
+                                                    color='primary'
+                                                    placeholder={student}
+                                                    focused
+                                                />
+                                            </Paper>)}
+                                    </Paper>
+                                </Paper>
+                            </>
+                    }
                 </>
+
             }
         </Paper>
     )
