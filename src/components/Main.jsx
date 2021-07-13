@@ -5,6 +5,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout, setStudentsList, startLogin } from "../redux/actions/actions";
 import firebase from '../firebaseConfig'
 import { SET_USER } from "../redux/actions/action_types";
+import LoginLoading from "./LoginLoading";
+import LoginError from "./LoginError";
 
 
 const useStyles = makeStyles({
@@ -61,7 +63,7 @@ export default function Main() {
     const dispatch = useDispatch()
     const user = useSelector(state => state.user)
     const students = useSelector(state => state.studentsList)
-    const sessionId = useSelector(state => state.session)
+    const session = useSelector(state => state.session)
     const listRef = useRef()
 
     useEffect(() => {
@@ -114,7 +116,10 @@ export default function Main() {
 
     return (
         <Paper className={classes.container}>
-            {!user.user &&
+            {user.user && <Fab onClick={logoutHandler} className={classes.floating}>
+                <img src={user.user?.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
+            </Fab>}
+            {!user.user && !session.session ?
                 <>
                     <Typography variant='h2' component='h2'>Everyone Answers</Typography>
                     <Typography variant='h6' component='h6'>Welcome. Please Sign In.</Typography>
@@ -128,64 +133,61 @@ export default function Main() {
                         Sign In With Google
                     </Button>
                     {user.error && <Typography variant='h6' component='h6'>{user.error}</Typography>}
-                </>
-            }
-            {
-                user.user &&
-                <>
-                    <Fab onClick={logoutHandler} className={classes.floating}>
-                        <img src={user.user.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
-                    </Fab>
-                    {
-                        !sessionId ?
-                            <>
-                                <Paper elevation={0} className={classes.alignLeft}>
-                                    <Typography variant='h2' component='h2'>My Students</Typography>
-                                    <Typography variant='h6' component='h6'>Enter the name of each person who will answer your questions, separated by comma, or new line</Typography>
-                                    <TextField
-                                        variant="outlined"
-                                        multiline rows='15'
-                                        color='primary'
-                                        placeholder='e.g. Amit, Francis, Andrew, Nithya'
-                                        inputRef={listRef}
-                                        style={{ width: '100%' }}
-                                    />
-                                    <Paper elevation={0} className={classes.submitDiv}>
-                                        <Button
-                                            color='primary'
-                                            variant='contained'
-                                            onClick={submitHandler}
-                                        >
-                                            Submit
-                                        </Button>
-                                        <Typography variant='h6' component='h6'>{students.isSubmitting ? 'Submitting...' : students.error ? students.error : ''}</Typography>
-                                    </Paper>
-                                </Paper>
-                            </> :
-                            <>
-                                <Paper elevation={0} className={classes.alignLeft}>
+                </> :
 
-                                    <Typography variant='h2' component='h2' >Dashboard</Typography>
-                                    <Typography variant='subtitle1' component='p'>Students Link: <Link target="_blank" rel="noreferrer noopener" href={`${window.location.href}${sessionId}`}>{window.location.href}{sessionId}</Link></Typography>
-                                    <Paper className={classes.allStudents} elevation={0}>
-                                        {students.list.map((student, index) =>
-                                            <Paper className={classes.student} elevation={0} key={index}>
-                                                <Typography style={{ color: '#4456b7' }}>{student}</Typography>
-                                                <TextField
-                                                    className={classes.studentTextArea}
-                                                    variant="outlined"
-                                                    multiline
-                                                    rows='5'
-                                                    color='primary'
-                                                    placeholder={student}
-                                                    focused
-                                                />
-                                            </Paper>)}
+                user.user && session.isRetrieving ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
+                    <>
+
+                        {
+                            !session.session && !session.error ?
+                                <>
+                                    <Paper elevation={0} className={classes.alignLeft}>
+                                        <Typography variant='h2' component='h2'>My Students</Typography>
+                                        <Typography variant='h6' component='h6'>Enter the name of each person who will answer your questions, separated by comma, or new line</Typography>
+                                        <TextField
+                                            variant="outlined"
+                                            multiline rows='15'
+                                            color='primary'
+                                            placeholder='e.g. Amit, Francis, Andrew, Nithya'
+                                            inputRef={listRef}
+                                            style={{ width: '100%' }}
+                                        />
+                                        <Paper elevation={0} className={classes.submitDiv}>
+                                            <Button
+                                                color='primary'
+                                                variant='contained'
+                                                onClick={submitHandler}
+                                            >
+                                                Submit
+                                            </Button>
+                                            <Typography variant='h6' component='h6'>{students.isSubmitting ? 'Submitting...' : students.error ? students.error : ''}</Typography>
+                                        </Paper>
                                     </Paper>
-                                </Paper>
-                            </>
-                    }
-                </>
+                                </> : session.session && !session.error &&
+                                <>
+                                    <Paper elevation={0} className={classes.alignLeft}>
+
+                                        <Typography variant='h2' component='h2' >Dashboard</Typography>
+                                        <Typography variant='subtitle1' component='p'>Students Link: <Link target="_blank" rel="noreferrer noopener" href={`${window.location.href}${session.session}`}>{window.location.href}{session.session}</Link></Typography>
+                                        <Paper className={classes.allStudents} elevation={0}>
+                                            {students.list.map((student, index) =>
+                                                <Paper className={classes.student} elevation={0} key={index}>
+                                                    <Typography style={{ color: '#4456b7' }}>{student}</Typography>
+                                                    <TextField
+                                                        className={classes.studentTextArea}
+                                                        variant="outlined"
+                                                        multiline
+                                                        rows='5'
+                                                        color='primary'
+                                                        placeholder={student}
+                                                        focused
+                                                    />
+                                                </Paper>)}
+                                        </Paper>
+                                    </Paper>
+                                </>
+                        }
+                    </> : <LoginError />
 
             }
         </Paper>
