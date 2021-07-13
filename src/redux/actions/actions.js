@@ -1,5 +1,5 @@
 import firebase from '../../firebaseConfig'
-import { IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, SET_SESSION, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
+import { BEGIN_END_SESSION, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, SET_SESSION, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
 var provider = new firebase.auth.GoogleAuthProvider();
 const databaseRef = firebase.firestore()
 
@@ -59,12 +59,7 @@ export async function getUserSessionInformation(email, dispatch) {
 
 export const logout = () => {
     return async(dispatch) => {
-        dispatch({
-            type: RESET_SESSION
-        })
-        dispatch({
-            type: RESET_STUDENTS
-        })
+        resetSession(dispatch)
         firebase.auth().signOut().then(() => {
 
             dispatch({
@@ -106,4 +101,38 @@ export const setStudentsList = (list, email) => {
             })
         }
     }
+}
+
+export const endUserSession = (sessionId, email) => {
+    return async(dispatch) => {
+        let teacherEmail = email.replaceAll('.', '_')
+        dispatch({
+            type: BEGIN_END_SESSION
+        })
+        try {
+            await databaseRef.collection(teacherEmail).doc(sessionId).delete()
+            dispatch({
+                type: END_SESSION_SUCCESSFUL
+            })
+            resetSession(dispatch)
+        } catch (error) {
+            dispatch({
+                type: END_SESSION_ERROR,
+                payload: error.message
+            })
+        }
+    }
+}
+
+
+function resetSession(dispatch) {
+    dispatch({
+        type: RESET_SESSION
+    })
+    dispatch({
+        type: RESET_STUDENTS
+    })
+    dispatch({
+        type: END_SESSION_RESET
+    })
 }

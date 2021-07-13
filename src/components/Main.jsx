@@ -2,7 +2,7 @@ import { Avatar, Button, Typography, makeStyles, Paper, Fab, TextField, Link } f
 import AccountCircleSharpIcon from '@material-ui/icons/AccountCircleSharp'
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getUserSessionInformation, logout, setStudentsList, startLogin } from "../redux/actions/actions";
+import { endUserSession, getUserSessionInformation, logout, setStudentsList, startLogin } from "../redux/actions/actions";
 import firebase from '../firebaseConfig'
 import { SET_USER } from "../redux/actions/action_types";
 import LoginLoading from "./LoginLoading";
@@ -18,7 +18,7 @@ const useStyles = makeStyles({
         minHeight: '100vh',
         justifyContent: 'flex-start',
         alignItems: 'center',
-        padding: '25px',
+        padding: '35px',
     },
     floating: {
         position: 'absolute',
@@ -56,6 +56,19 @@ const useStyles = makeStyles({
         gap: '1rem',
         padding: '25px',
     },
+    dashboardDiv: {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        width: '95%',
+        marginTop: '25px',
+    },
+    endSessionDiv: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        gap: '50px',
+    },
 });
 
 export default function Main() {
@@ -64,10 +77,11 @@ export default function Main() {
     const user = useSelector(state => state.user)
     const students = useSelector(state => state.studentsList)
     const session = useSelector(state => state.session)
+    const endSession = useSelector(state => state.endSession)
     const listRef = useRef()
 
     useEffect(() => {
-        firebase.auth().onAuthStateChanged(async(user) => {
+        firebase.auth().onAuthStateChanged(async (user) => {
             if (user) {
                 dispatch({
                     type: SET_USER,
@@ -88,6 +102,10 @@ export default function Main() {
 
     const logoutHandler = () => {
         dispatch(logout())
+    }
+
+    const endSessionHandler = () => {
+        dispatch(endUserSession(session.session, user.user.email))
     }
 
     const submitHandler = () => {
@@ -166,9 +184,34 @@ export default function Main() {
                                 </> : session.session && !session.error &&
                                 <>
                                     <Paper elevation={0} className={classes.alignLeft}>
-
-                                        <Typography variant='h2' component='h2' >Dashboard</Typography>
-                                        <Typography variant='subtitle1' component='p'>Students Link: <Link target="_blank" rel="noreferrer noopener" href={`${window.location.href}${session.session}`}>{window.location.href}{session.session}</Link></Typography>
+                                        <Paper elevation={0} className={classes.dashboardDiv}>
+                                            <Typography variant='h2' component='h2' >Dashboard</Typography>
+                                            <Paper elevation={0} className = {classes.endSessionDiv}>
+                                                <Typography
+                                                    variant='subtitle1'
+                                                    component='p'
+                                                >
+                                                    {endSession.isEndingSession && !endSession.error ? 'Ending Session...' : endSession.error}
+                                                </Typography>
+                                                <Button
+                                                    variant='contained'
+                                                    onClick={endSessionHandler}
+                                                    disabled={endSession.isEndingSession}
+                                                >
+                                                    End Session
+                                                </Button>
+                                            </Paper>
+                                        </Paper>
+                                        <Typography
+                                            variant='subtitle1'
+                                            component='p'>Students Link:
+                                            <Link
+                                                target="_blank"
+                                                rel="noreferrer noopener"
+                                                href={`${window.location.href}${session.session}`}>
+                                                {window.location.href}{session.session}
+                                            </Link>
+                                        </Typography>
                                         <Paper className={classes.allStudents} elevation={0}>
                                             {students.list.map((student, index) =>
                                                 <Paper className={classes.student} elevation={0} key={index}>
