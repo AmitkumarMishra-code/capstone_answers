@@ -17,9 +17,6 @@ export const startLogin = () => {
                     type: LOG_IN_SUCCESSFUL,
                     payload: user
                 })
-                dispatch({
-                    type: IS_RETRIEVING_SESSION_INFO
-                })
                 await getUserSessionInformation(user.email, dispatch)
             }).catch((error) => {
                 var errorMessage = error.message;
@@ -31,7 +28,10 @@ export const startLogin = () => {
     }
 }
 
-async function getUserSessionInformation(email, dispatch) {
+export async function getUserSessionInformation(email, dispatch) {
+    dispatch({
+        type: IS_RETRIEVING_SESSION_INFO
+    })
     let teacherEmail = email.replaceAll('.', '_')
     try {
         let session = await databaseRef.collection(teacherEmail).get()

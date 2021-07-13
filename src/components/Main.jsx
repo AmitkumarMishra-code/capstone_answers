@@ -2,7 +2,7 @@ import { Avatar, Button, Typography, makeStyles, Paper, Fab, TextField, Link } f
 import AccountCircleSharpIcon from '@material-ui/icons/AccountCircleSharp'
 import { useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { logout, setStudentsList, startLogin } from "../redux/actions/actions";
+import { getUserSessionInformation, logout, setStudentsList, startLogin } from "../redux/actions/actions";
 import firebase from '../firebaseConfig'
 import { SET_USER } from "../redux/actions/action_types";
 import LoginLoading from "./LoginLoading";
@@ -67,13 +67,13 @@ export default function Main() {
     const listRef = useRef()
 
     useEffect(() => {
-        console.log('useEffect called')
-        firebase.auth().onAuthStateChanged((user) => {
+        firebase.auth().onAuthStateChanged(async(user) => {
             if (user) {
                 dispatch({
                     type: SET_USER,
                     payload: user
                 })
+                await getUserSessionInformation(user.email, dispatch)
             }
             else {
                 dispatch(logout())
