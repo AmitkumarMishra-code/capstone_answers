@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { retrieveStudentList } from "../redux/actions/actions";
 import { SET_STUDENT_NAME } from "../redux/actions/action_types";
+import LoginLoading from "./LoginLoading";
 
 const useStyles = makeStyles({
     formControl: {
@@ -53,28 +54,31 @@ export default function Students(props) {
 
     return (
         <Paper elevation={0} className={classes.studentsContainer}>
-            <Typography variant='h3' component='h3'>Select Your Name</Typography>
-            <FormControl variant="outlined" className={classes.formControl}>
-                <InputLabel id="select-name">Name</InputLabel>
-                <Select
-                    labelId="select-name"
-                    id="select-name"
-                    onChange={changeHandler}
-                    label="Name"
-                    required
-                    disabled={studentSession.isRetrieving}
-                    value={studentName}
+            {studentSession.isRetrieving ? <LoginLoading/>: <>
+                <Typography variant='h3' component='h3'>Select Your Name</Typography>
+                <FormControl variant="outlined" className={classes.formControl}>
+                    <InputLabel id="select-name">Name</InputLabel>
+                    <Select
+                        labelId="select-name"
+                        id="select-name"
+                        onChange={changeHandler}
+                        label="Name"
+                        required
+                        disabled={studentSession.isRetrieving}
+                        value={studentName}
+                    >
+                        {studentSession.list.length > 0 && studentSession.list.map((student, idx) => <MenuItem value={student} key={idx}>{student}</MenuItem>)}
+                    </Select>
+                </FormControl>
+                <Button
+                    variant='contained'
+                    color='primary'
+                    onClick={clickHandler}
                 >
-                    {studentSession.list.length > 0 && studentSession.list.map((student, idx) => <MenuItem value={student} key={idx}>{student}</MenuItem>)}
-                </Select>
-            </FormControl>
-            <Button
-                variant='contained'
-                color='primary'
-                onClick={clickHandler}
-            >
-                Continue
-            </Button>
+                    Continue
+                </Button>
+            </>
+            }
         </Paper>
     )
 }
