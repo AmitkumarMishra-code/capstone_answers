@@ -35,15 +35,17 @@ export async function getUserSessionInformation(email, dispatch) {
     let teacherEmail = email.replaceAll('.', '_')
     try {
         let currentSession = await databaseRef.collection('active_sessions').where('teacher', '==', email).get()
-        let session = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
+
         console.log('printing user session info')
             // console.log(session.data())
+        console.log(currentSession.size)
 
         dispatch({
             type: RETRIEVE_SESSION_INFORMATION_SUCCESS,
             payload: currentSession.size ? currentSession.docs[0].id : null
         })
         if (currentSession.size) {
+            let session = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
             let studentsData = Object.keys(session.data()).sort()
             dispatch({
                 type: SUBMIT_SUCCESSFUL,
@@ -51,6 +53,7 @@ export async function getUserSessionInformation(email, dispatch) {
             })
         }
     } catch (error) {
+        console.log(error.message)
         dispatch({
             type: RETRIEVE_SESSION_INFORMATION_ERROR,
             payload: error.message

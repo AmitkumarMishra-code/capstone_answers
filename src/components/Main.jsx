@@ -233,7 +233,7 @@ export default function Main() {
                         }
                     </> : <LoginError />
             }
-            {session.error && <LoginError/>}
+            {/* {session.error && <LoginError/>} */}
         </Paper>
     )
 }
