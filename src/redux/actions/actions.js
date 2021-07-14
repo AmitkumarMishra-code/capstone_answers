@@ -8,6 +8,8 @@ export const startLogin = () => {
         dispatch({
             type: USER_IS_LOGGING_IN
         })
+        await firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION)
+
         firebase.auth()
             .signInWithPopup(provider)
             .then(async(result) => {

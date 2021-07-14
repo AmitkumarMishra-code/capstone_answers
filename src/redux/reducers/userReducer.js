@@ -1,6 +1,6 @@
 import { LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, SET_USER, USER_IS_LOGGING_IN } from "../actions/action_types";
 
-export default function userReducer(state = { isLoggingIn: false, user: null, error: null }, action) {
+export default function userReducer(state = { isLoggingIn: false, user: undefined, error: null }, action) {
     switch (action.type) {
         case USER_IS_LOGGING_IN:
             return {...state, isLoggingIn: true }

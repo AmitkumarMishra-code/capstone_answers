@@ -6,6 +6,7 @@ import studentIdentityReducer from "./reducers/studentIdentityReducer";
 import studentListReducer from "./reducers/studentListReducer";
 import studentSessionReducer from "./reducers/studentSessionReducer";
 import userReducer from "./reducers/userReducer";
+import logger from 'redux-logger'
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -16,4 +17,4 @@ const rootReducer = combineReducers({
     studentName: studentIdentityReducer
 })
 
-export const store = createStore(rootReducer, applyMiddleware(thunk))
+export const store = createStore(rootReducer, applyMiddleware(thunk, logger))

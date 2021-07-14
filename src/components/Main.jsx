@@ -1,10 +1,8 @@
-import { Avatar, Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
-import AccountCircleSharpIcon from '@material-ui/icons/AccountCircleSharp'
-import { useEffect, useRef } from "react";
+import {Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
+import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { endUserSession, getUserSessionInformation, logout, setStudentsList, startLogin } from "../redux/actions/actions";
-import firebase from '../firebaseConfig'
-import { SET_USER } from "../redux/actions/action_types";
+import { endUserSession, logout, setStudentsList } from "../redux/actions/actions";
+
 import LoginLoading from "./LoginLoading";
 import LoginError from "./LoginError";
 
@@ -55,7 +53,7 @@ const useStyles = makeStyles({
         alignItems: 'flex-start',
         gap: '1rem',
         padding: '25px',
-        width:'100%',
+        width: '100%',
     },
     dashboardDiv: {
         display: 'flex',
@@ -81,25 +79,10 @@ export default function Main() {
     const endSession = useSelector(state => state.endSession)
     const listRef = useRef()
 
-    useEffect(() => {
-        firebase.auth().onAuthStateChanged(async (user) => {
-            if (user) {
-                dispatch({
-                    type: SET_USER,
-                    payload: user
-                })
-                await getUserSessionInformation(user.email, dispatch)
-            }
-            else {
-                dispatch(logout())
-            }
-        });
-        // eslint-disable-next-line 
-    }, [])
 
-    const loginHandler = () => {
-        dispatch(startLogin())
-    }
+    // const loginHandler = () => {
+    //     dispatch(startLogin())
+    // }
 
     const logoutHandler = () => {
         dispatch(logout())
@@ -138,23 +121,8 @@ export default function Main() {
             {user.user && <Fab onClick={logoutHandler} className={classes.floating}>
                 <img src={user.user?.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
             </Fab>}
-            {!user.user && !session.session ?
-                <>
-                    <Typography variant='h2' component='h2'>Everyone Answers</Typography>
-                    <Typography variant='h6' component='h6'>Welcome. Please Sign In.</Typography>
-                    <AccountCircleSharpIcon style={{ fontSize: 100 }} color='disabled' />
-                    <Button
-                        variant="contained"
-                        startIcon={<Avatar src={"https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg"} />}
-                        onClick={loginHandler}
-                        disabled={user.isLoggingIn}
-                    >
-                        Sign In With Google
-                    </Button>
-                    {user.error && <Typography variant='h6' component='h6'>{user.error}</Typography>}
-                </> :
-
-                user.user && session.isRetrieving ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
+            {
+                (user.user && session.isRetrieving) || user.user === undefined ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
                     <>
 
                         {
@@ -187,7 +155,7 @@ export default function Main() {
                                     <Paper elevation={0} className={classes.alignLeft}>
                                         <Paper elevation={0} className={classes.dashboardDiv}>
                                             <Typography variant='h2' component='h2' >Dashboard</Typography>
-                                            <Paper elevation={0} className = {classes.endSessionDiv}>
+                                            <Paper elevation={0} className={classes.endSessionDiv}>
                                                 <Typography
                                                     variant='subtitle1'
                                                     component='p'
@@ -214,26 +182,27 @@ export default function Main() {
                                             </Link>
                                         </Typography>
                                         <Paper className={classes.allStudents} elevation={0}>
-                                            {students.list.map((student, index) =>
-                                                <Paper className={classes.student} elevation={0} key={index}>
-                                                    <Typography style={{ color: '#4456b7' }}>{student}</Typography>
-                                                    <TextField
-                                                        className={classes.studentTextArea}
-                                                        variant="outlined"
-                                                        multiline
-                                                        rows='5'
-                                                        color='primary'
-                                                        placeholder={student}
-                                                        focused
-                                                    />
-                                                </Paper>)}
+                                            {
+                                                students.list.map((student, index) =>
+                                                    <Paper className={classes.student} elevation={0} key={index}>
+                                                        <Typography style={{ color: '#4456b7' }}>{student}</Typography>
+                                                        <TextField
+                                                            className={classes.studentTextArea}
+                                                            variant="outlined"
+                                                            multiline
+                                                            rows='5'
+                                                            color='primary'
+                                                            placeholder={student}
+                                                            focused
+                                                        />
+                                                    </Paper>)
+                                            }
                                         </Paper>
                                     </Paper>
                                 </>
                         }
                     </> : <LoginError />
             }
-            {/* {session.error && <LoginError/>} */}
         </Paper>
     )
 }
