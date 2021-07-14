@@ -2,9 +2,10 @@ import { Button, FormControl, InputLabel, makeStyles, MenuItem, Paper, Select, T
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { retrieveStudentList } from "../redux/actions/actions";
-import { SET_STUDENT_NAME } from "../redux/actions/action_types";
+import { anonymousLogin } from "../redux/actions/actions";
+import { SET_ANONYMOUS_USER, SET_STUDENT_NAME } from "../redux/actions/action_types";
 import LoginLoading from "./LoginLoading";
+import firebase from '../firebaseConfig'
 
 const useStyles = makeStyles({
     formControl: {
@@ -36,25 +37,39 @@ export default function Students(props) {
     }
 
     const clickHandler = () => {
-        if (!studentName.length) {
+        if (!studentName.name.length) {
             alert('Please select a name from the list!')
             return
         }
         history.push({
-            pathname: `/${props.match.params.id}/${studentName}`,
-            state: { name: studentName }
+            pathname: `/${props.match.params.id}/${studentName.name}`,
+            state: { name: studentName.name }
         })
     }
 
     useEffect(() => {
         let sessionId = props.match.params.id
-        dispatch(retrieveStudentList(sessionId))
+        dispatch(anonymousLogin(sessionId))
         // eslint-disable-next-line
     }, [])
 
+    
+    useEffect(() => {
+        firebase.auth().onAuthStateChanged((user) => {
+            console.log('in Students')
+            if (user) {
+              dispatch({
+                  type:SET_ANONYMOUS_USER,
+                  payload: user
+              })
+            }
+          });
+          // eslint-disable-next-line
+    },[])
+
     return (
         <Paper elevation={0} className={classes.studentsContainer}>
-            {studentSession.isRetrieving ? <LoginLoading/>: <>
+            {studentSession.isRetrieving || studentName.user === undefined ? <LoginLoading/>: <>
                 <Typography variant='h3' component='h3'>Select Your Name</Typography>
                 <FormControl variant="outlined" className={classes.formControl}>
                     <InputLabel id="select-name">Name</InputLabel>
@@ -65,7 +80,7 @@ export default function Students(props) {
                         label="Name"
                         required
                         disabled={studentSession.isRetrieving}
-                        value={studentName}
+                        value={studentName.name}
                     >
                         {studentSession.list.length > 0 && studentSession.list.map((student, idx) => <MenuItem value={student} key={idx}>{student}</MenuItem>)}
                     </Select>

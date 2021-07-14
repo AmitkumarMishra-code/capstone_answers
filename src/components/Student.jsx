@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { SET_STUDENT_NAME } from "../redux/actions/action_types";
+import {  SET_STUDENT_NAME } from "../redux/actions/action_types";
+
 
 const useStyles = makeStyles({
     studentContainer: {
@@ -24,7 +25,7 @@ export default function Student() {
     const dispatch = useDispatch()
 
     useEffect(() => {
-        if(studentName === ''){
+        if(studentName.name === ''){
             if(history.location.state)
             dispatch({
                 type: SET_STUDENT_NAME,
@@ -37,13 +38,15 @@ export default function Student() {
         // eslint-disable-next-line
     },[])
 
+
+
 const changeHandler = () => {
     console.log('change handler called: ' + answerRef.current.value)
 }
 
     return (
         <Paper elevation={0} className={classes.studentContainer}>
-            <Typography variant='subtitle2' component='p'>{studentName}</Typography>
+            <Typography variant='subtitle2' component='p'>{studentName.name}</Typography>
             <Typography variant='h2' component='h2'>My Answer</Typography>
             <Typography variant='subtitle2' component='p'>Enter your answer below. This text is visible to the teacher.</Typography>
             <TextField

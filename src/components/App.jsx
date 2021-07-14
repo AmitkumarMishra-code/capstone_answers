@@ -12,23 +12,6 @@ import Login from "./Login"
 
 
 export default function App() {
-    const dispatch = useDispatch()
-    useEffect(() => {
-        firebase.auth().onAuthStateChanged(async (user) => {
-            console.log('in authstatechanged')
-            if (user) {
-                dispatch({
-                    type: SET_USER,
-                    payload: user
-                })
-                await getUserSessionInformation(user.email, dispatch)
-            }
-            else {
-                dispatch(logout())
-            }
-        });
-        // eslint-disable-next-line 
-    }, [])
     return (
         <Router>
             <Switch>
@@ -49,8 +32,24 @@ export default function App() {
 
 function PrivateRoute({ children, ...rest }) {
     const user = useSelector(state => state.user)
-    console.log(children)
-    console.log(rest)
+    const dispatch = useDispatch()
+    useEffect(() => {
+        firebase.auth().onAuthStateChanged(async (user) => {
+            console.log('in authstatechanged')
+            if (user) {
+                dispatch({
+                    type: SET_USER,
+                    payload: user
+                })
+                await getUserSessionInformation(user.email, dispatch)
+            }
+            else {
+                dispatch(logout())
+            }
+        });
+        // eslint-disable-next-line 
+    }, [])
+
     return (
         <Route
             {...rest}

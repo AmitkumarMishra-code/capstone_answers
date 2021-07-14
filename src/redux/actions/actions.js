@@ -170,3 +170,16 @@ export const retrieveStudentList = (sessionId) => {
         }
     }
 }
+
+
+export const anonymousLogin = (sessionId) => {
+    return async(dispatch) => {
+        firebase.auth().signInAnonymously()
+            .then(() => {
+                dispatch(retrieveStudentList(sessionId))
+            })
+            .catch((error) => {
+                console.log(error.message)
+            });
+    }
+}
