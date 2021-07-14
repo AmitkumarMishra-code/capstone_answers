@@ -55,6 +55,7 @@ const useStyles = makeStyles({
         alignItems: 'flex-start',
         gap: '1rem',
         padding: '25px',
+        width:'100%',
     },
     dashboardDiv: {
         display: 'flex',
@@ -231,8 +232,8 @@ export default function Main() {
                                 </>
                         }
                     </> : <LoginError />
-
             }
+            {session.error && <LoginError/>}
         </Paper>
     )
 }

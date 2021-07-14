@@ -1,5 +1,5 @@
 import firebase from '../../firebaseConfig'
-import { BEGIN_END_SESSION, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, SET_SESSION, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
+import { BEGIN_END_SESSION, BEGIN_RETRIEVING_STUDENTS_LIST, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, RETRIEVING_STUDENTS_LIST_ERROR, RETRIEVING_STUDENTS_LIST_SUCCESS, SET_SESSION, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
 var provider = new firebase.auth.GoogleAuthProvider();
 const databaseRef = firebase.firestore()
 
@@ -34,16 +34,17 @@ export async function getUserSessionInformation(email, dispatch) {
     })
     let teacherEmail = email.replaceAll('.', '_')
     try {
-        let session = await databaseRef.collection(teacherEmail).get()
+        let currentSession = await databaseRef.collection('active_sessions').where('teacher', '==', email).get()
+        let session = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
         console.log('printing user session info')
-        console.log(session.size)
+            // console.log(session.data())
 
         dispatch({
             type: RETRIEVE_SESSION_INFORMATION_SUCCESS,
-            payload: session.size ? session.docs[0].id : null
+            payload: currentSession.size ? currentSession.docs[0].id : null
         })
-        if (session.size) {
-            let studentsData = Object.keys(session.docs[0].data()).sort()
+        if (currentSession.size) {
+            let studentsData = Object.keys(session.data()).sort()
             dispatch({
                 type: SUBMIT_SUCCESSFUL,
                 payload: studentsData
@@ -85,10 +86,10 @@ export const setStudentsList = (list, email) => {
         console.log(studentsObj)
         try {
             let listId = await databaseRef.collection(teacherEmail).add(studentsObj)
-                // console.log(listId.id)
+            let sessionId = await databaseRef.collection('active_sessions').add({ teacher: email, currentSession: listId.id })
             dispatch({
                 type: SET_SESSION,
-                payload: listId.id
+                payload: sessionId.id
             })
             dispatch({
                 type: SUBMIT_SUCCESSFUL,
@@ -105,12 +106,13 @@ export const setStudentsList = (list, email) => {
 
 export const endUserSession = (sessionId, email) => {
     return async(dispatch) => {
-        let teacherEmail = email.replaceAll('.', '_')
+        // let teacherEmail = email.replaceAll('.', '_')
         dispatch({
             type: BEGIN_END_SESSION
         })
         try {
-            await databaseRef.collection(teacherEmail).doc(sessionId).delete()
+            // await databaseRef.collection(teacherEmail).doc(sessionId).delete()
+            await databaseRef.collection('active_sessions').doc(sessionId).delete()
             dispatch({
                 type: END_SESSION_SUCCESSFUL
             })
@@ -135,4 +137,31 @@ function resetSession(dispatch) {
     dispatch({
         type: END_SESSION_RESET
     })
+}
+
+//Student Actions
+
+export const retrieveStudentList = (sessionId) => {
+    return async(dispatch) => {
+        dispatch({
+            type: BEGIN_RETRIEVING_STUDENTS_LIST
+        })
+        try {
+            let currentSession = await databaseRef.collection('active_sessions').doc(sessionId).get()
+            let teacherEmail = currentSession.data().teacher.replaceAll('.', '_')
+            let currentSessionId = currentSession.data().currentSession
+            let currentSessionDetails = await databaseRef.collection(teacherEmail).doc(currentSessionId).get()
+            let studentsData = Object.keys(currentSessionDetails.data()).sort()
+            console.log(studentsData)
+            dispatch({
+                type: RETRIEVING_STUDENTS_LIST_SUCCESS,
+                payload: studentsData
+            })
+        } catch (error) {
+            dispatch({
+                type: RETRIEVING_STUDENTS_LIST_ERROR,
+                payload: error.message
+            })
+        }
+    }
 }
