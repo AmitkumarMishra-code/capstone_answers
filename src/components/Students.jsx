@@ -62,7 +62,6 @@ export default function Students(props) {
     
     useEffect(() => {
         firebase.auth().onAuthStateChanged((user) => {
-            console.log('in Students')
             if (user) {
               dispatch({
                   type:SET_ANONYMOUS_USER,

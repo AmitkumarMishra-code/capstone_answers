@@ -47,7 +47,6 @@ export default function Student() {
 
 
     const changeHandler = () => {
-        console.log('change handler called: ' + answerRef.current.value)
         dispatch(studentSync(answerRef.current.value, studentName.teacher, studentName.currentSession, studentName.name))
     }
 
