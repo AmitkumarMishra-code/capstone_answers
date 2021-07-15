@@ -18,6 +18,11 @@ export const SUBMIT_SUCCESSFUL = 'SUBMIT_SUCCESSFUL';
 export const SUBMIT_ERROR = 'SUBMIT_ERROR';
 export const RESET_STUDENTS = 'RESET_STUDENTS';
 
+//Teacher Clear Answers
+export const BEGIN_CLEARING_ANSWERS = 'BEGIN_CLEARING_ANSWERS';
+export const CLEAR_ANSWERS_SUCCESS = 'CLEAR_ANSWERS_SUCCESS';
+export const CLEAR_ANSWERS_ERROR = 'CLEAR_ANSWERS_ERROR';
+
 // Reset Session
 export const RESET_SESSION = 'RESET_SESSION';
 export const SET_SESSION = 'SET_SESSION';
@@ -44,3 +49,6 @@ export const SET_TEACHER_DETAILS = 'SET_TEACHER_DETAILS';
 export const BEGIN_SYNCING_TEXT = 'BEGIN_SYNCING_TEXT';
 export const STUDENT_SYNC_SUCCESS = 'STUDENT_SYNC_SUCCESS';
 export const STUDENT_SYNC_ERROR = 'STUDENT_SYNC_ERROR';
+
+//to unsubscribe to firestore listener
+export const ADD_LISTENER = 'ADD_LISTENER';

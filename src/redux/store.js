@@ -8,6 +8,8 @@ import studentSessionReducer from "./reducers/studentSessionReducer";
 import userReducer from "./reducers/userReducer";
 import logger from 'redux-logger'
 import studentSyncReducer from "./reducers/studentSyncReducer";
+import clearAnswersReducer from "./reducers/clearAnswersReducer";
+import dbListenerReducer from "./reducers/dbListenerReducer";
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -16,7 +18,9 @@ const rootReducer = combineReducers({
     endSession: endSessionReducer,
     studentSession: studentSessionReducer,
     studentName: studentIdentityReducer,
-    studentSync: studentSyncReducer
+    studentSync: studentSyncReducer,
+    clearAnswers: clearAnswersReducer,
+    listener: dbListenerReducer
 })
 
 export const store = createStore(rootReducer, applyMiddleware(thunk, logger))

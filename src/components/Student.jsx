@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import { studentSync } from "../redux/actions/actions";
+import { linkStudent, studentSync } from "../redux/actions/actions";
 import { SET_STUDENT_NAME } from "../redux/actions/action_types";
 
 
@@ -41,7 +41,8 @@ export default function Student() {
     }, [])
 
     useEffect(() => {
-        
+        dispatch(linkStudent(answerRef, studentName.teacher, studentName.currentSession, studentName.name))
+        // eslint-disable-next-line
     },[])
 
 

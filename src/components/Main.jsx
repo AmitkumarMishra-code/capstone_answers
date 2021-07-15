@@ -1,7 +1,7 @@
 import { Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { endUserSession, logout, setStudentsList } from "../redux/actions/actions";
+import { beginClearingAnswers, endUserSession, logout, setStudentsList } from "../redux/actions/actions";
 
 import LoginLoading from "./LoginLoading";
 import LoginError from "./LoginError";
@@ -77,20 +77,25 @@ export default function Main() {
     const students = useSelector(state => state.studentsList)
     const session = useSelector(state => state.session)
     const endSession = useSelector(state => state.endSession)
+    const clearAnswers = useSelector(state => state.clearAnswers)
+    const unsubscribe = useSelector(state => state.listener)
     const listRef = useRef()
 
 
-    // const loginHandler = () => {
-    //     dispatch(startLogin())
-    // }
-
     const logoutHandler = () => {
+        unsubscribe()
         dispatch(logout())
     }
 
     const endSessionHandler = () => {
         dispatch(endUserSession(session.session, user.user.email))
+        unsubscribe()
     }
+
+    // useEffect(() => {
+    //     return () => unsubscribe()
+    //     // eslint-disable-next-line
+    // },[])
 
     const submitHandler = () => {
         if (listRef.current.value.trim().length === 0) {
@@ -114,6 +119,10 @@ export default function Main() {
         studentNameSet = null
         dispatch(setStudentsList(studentNames, user.user.email))
         listRef.current.value = ''
+    }
+
+    const clearAnswersHandler = () => {
+        dispatch(beginClearingAnswers(user.user.email))
     }
 
     return (
@@ -154,18 +163,29 @@ export default function Main() {
                                 <>
                                     <Paper elevation={0} className={classes.alignLeft}>
                                         <Paper elevation={0} className={classes.dashboardDiv}>
-                                            <Typography variant='h2' component='h2' >Dashboard</Typography>
+                                            <Paper elevation={0} className={classes.endSessionDiv}>
+                                                <Typography variant='h2' component='h2' >Dashboard</Typography>
+                                                <Button
+                                                    variant = 'contained'
+                                                    color = 'primary'
+                                                    onClick = {clearAnswersHandler}
+                                                    disabled = {clearAnswers.isClearing || endSession.isEndingSession}
+                                                >
+                                                    Clear Answers
+                                                </Button>
+                                            </Paper>
                                             <Paper elevation={0} className={classes.endSessionDiv}>
                                                 <Typography
                                                     variant='subtitle1'
                                                     component='p'
                                                 >
                                                     {endSession.isEndingSession && !endSession.error ? 'Ending Session...' : endSession.error}
+                                                    {clearAnswers.isClearing && !clearAnswers.error ? 'Clearing Answers...' : clearAnswers.error}
                                                 </Typography>
                                                 <Button
                                                     variant='contained'
                                                     onClick={endSessionHandler}
-                                                    disabled={endSession.isEndingSession}
+                                                    disabled={clearAnswers.isClearing || endSession.isEndingSession}
                                                 >
                                                     End Session
                                                 </Button>

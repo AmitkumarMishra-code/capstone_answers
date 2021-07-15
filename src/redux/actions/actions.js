@@ -1,5 +1,5 @@
 import firebase from '../../firebaseConfig'
-import { BEGIN_END_SESSION, BEGIN_RETRIEVING_STUDENTS_LIST, BEGIN_SYNCING_TEXT, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, RETRIEVING_STUDENTS_LIST_ERROR, RETRIEVING_STUDENTS_LIST_SUCCESS, SET_SESSION, SET_TEACHER_DETAILS, STUDENT_SYNC_ERROR, STUDENT_SYNC_SUCCESS, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
+import { ADD_LISTENER, BEGIN_CLEARING_ANSWERS, BEGIN_END_SESSION, BEGIN_RETRIEVING_STUDENTS_LIST, BEGIN_SYNCING_TEXT, CLEAR_ANSWERS_ERROR, CLEAR_ANSWERS_SUCCESS, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, RETRIEVING_STUDENTS_LIST_ERROR, RETRIEVING_STUDENTS_LIST_SUCCESS, SET_SESSION, SET_TEACHER_DETAILS, STUDENT_SYNC_ERROR, STUDENT_SYNC_SUCCESS, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
 var provider = new firebase.auth.GoogleAuthProvider();
 const databaseRef = firebase.firestore()
 
@@ -47,15 +47,7 @@ export async function getUserSessionInformation(email, dispatch) {
             payload: currentSession.size ? currentSession.docs[0].id : null
         })
         if (currentSession.size) {
-            // let session = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
-            // let studentEntries = Object.entries(session.data()).sort((a, b) => a[0].localeCompare(b[0]))
-            // console.log(studentEntries)
-            //     // let studentsData = Object.keys(session.data()).sort()
-            // dispatch({
-            //     type: SUBMIT_SUCCESSFUL,
-            //     payload: studentEntries
-            // })
-            databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession)
+            const unsubscribe = databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession)
                 .onSnapshot((doc) => {
                     let updatedData = Object.entries(doc.data()).sort((a, b) => a[0].localeCompare(b[0]))
                     dispatch({
@@ -63,6 +55,10 @@ export async function getUserSessionInformation(email, dispatch) {
                         payload: updatedData
                     })
                 });
+            dispatch({
+                type: ADD_LISTENER,
+                payload: unsubscribe
+            })
         }
     } catch (error) {
         console.log(error.message)
@@ -106,10 +102,7 @@ export const setStudentsList = (list, email) => {
                 type: SET_SESSION,
                 payload: sessionId.id
             })
-            dispatch({
-                type: SUBMIT_SUCCESSFUL,
-                payload: list
-            })
+            await getUserSessionInformation(email, dispatch)
         } catch (error) {
             dispatch({
                 type: SUBMIT_ERROR,
@@ -121,12 +114,10 @@ export const setStudentsList = (list, email) => {
 
 export const endUserSession = (sessionId, email) => {
     return async(dispatch) => {
-        // let teacherEmail = email.replaceAll('.', '_')
         dispatch({
             type: BEGIN_END_SESSION
         })
         try {
-            // await databaseRef.collection(teacherEmail).doc(sessionId).delete()
             await databaseRef.collection('active_sessions').doc(sessionId).delete()
             dispatch({
                 type: END_SESSION_SUCCESSFUL
@@ -217,6 +208,49 @@ export const studentSync = (text, teacherEmail, currentSession, name) => {
         } catch (error) {
             dispatch({
                 type: STUDENT_SYNC_ERROR,
+                payload: error.message
+            })
+        }
+    }
+}
+
+export const linkStudent = (answerRef, teacherEmail, currentSession, name) => {
+    return async(dispatch) => {
+        databaseRef.collection(teacherEmail).doc(currentSession)
+            .onSnapshot((doc) => {
+                let updatedData = Object.entries(doc.data())
+                for (let data of updatedData) {
+                    if (data[0] === name) {
+                        answerRef.current.value = data[1]
+                        break
+                    }
+                }
+            });
+    }
+}
+
+export const beginClearingAnswers = (email) => {
+    return async(dispatch) => {
+        let teacherEmail = email.replaceAll('.', '_')
+        dispatch({
+            type: BEGIN_CLEARING_ANSWERS
+        })
+        try {
+            let currentSession = await databaseRef.collection('active_sessions').where('teacher', '==', email).get()
+            if (currentSession.size) {
+                let currentData = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
+                let newData = {}
+                for (let student in currentData.data()) {
+                    newData[`${student}`] = ''
+                }
+                await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).set(newData)
+                dispatch({
+                    type: CLEAR_ANSWERS_SUCCESS
+                })
+            }
+        } catch (error) {
+            dispatch({
+                type: CLEAR_ANSWERS_ERROR,
                 payload: error.message
             })
         }
