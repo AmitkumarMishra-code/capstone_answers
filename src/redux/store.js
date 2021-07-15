@@ -7,6 +7,7 @@ import studentListReducer from "./reducers/studentListReducer";
 import studentSessionReducer from "./reducers/studentSessionReducer";
 import userReducer from "./reducers/userReducer";
 import logger from 'redux-logger'
+import studentSyncReducer from "./reducers/studentSyncReducer";
 
 const rootReducer = combineReducers({
     user: userReducer,
@@ -14,7 +15,8 @@ const rootReducer = combineReducers({
     session: sessionReducer,
     endSession: endSessionReducer,
     studentSession: studentSessionReducer,
-    studentName: studentIdentityReducer
+    studentName: studentIdentityReducer,
+    studentSync: studentSyncReducer
 })
 
 export const store = createStore(rootReducer, applyMiddleware(thunk, logger))

@@ -1,5 +1,5 @@
 import firebase from '../../firebaseConfig'
-import { BEGIN_END_SESSION, BEGIN_RETRIEVING_STUDENTS_LIST, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, RETRIEVING_STUDENTS_LIST_ERROR, RETRIEVING_STUDENTS_LIST_SUCCESS, SET_SESSION, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
+import { BEGIN_END_SESSION, BEGIN_RETRIEVING_STUDENTS_LIST, BEGIN_SYNCING_TEXT, END_SESSION_ERROR, END_SESSION_RESET, END_SESSION_SUCCESSFUL, IS_RETRIEVING_SESSION_INFO, IS_SUBMITTING, LOGOUT_USER, LOG_IN_SUCCESSFUL, LOG_IN_UNSUCCESSFUL, RESET_SESSION, RESET_STUDENTS, RETRIEVE_SESSION_INFORMATION_ERROR, RETRIEVE_SESSION_INFORMATION_SUCCESS, RETRIEVING_STUDENTS_LIST_ERROR, RETRIEVING_STUDENTS_LIST_SUCCESS, SET_SESSION, SET_TEACHER_DETAILS, STUDENT_SYNC_ERROR, STUDENT_SYNC_SUCCESS, SUBMIT_ERROR, SUBMIT_SUCCESSFUL, USER_IS_LOGGING_IN } from './action_types';
 var provider = new firebase.auth.GoogleAuthProvider();
 const databaseRef = firebase.firestore()
 
@@ -47,12 +47,22 @@ export async function getUserSessionInformation(email, dispatch) {
             payload: currentSession.size ? currentSession.docs[0].id : null
         })
         if (currentSession.size) {
-            let session = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
-            let studentsData = Object.keys(session.data()).sort()
-            dispatch({
-                type: SUBMIT_SUCCESSFUL,
-                payload: studentsData
-            })
+            // let session = await databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession).get()
+            // let studentEntries = Object.entries(session.data()).sort((a, b) => a[0].localeCompare(b[0]))
+            // console.log(studentEntries)
+            //     // let studentsData = Object.keys(session.data()).sort()
+            // dispatch({
+            //     type: SUBMIT_SUCCESSFUL,
+            //     payload: studentEntries
+            // })
+            databaseRef.collection(teacherEmail).doc(currentSession.docs[0].data().currentSession)
+                .onSnapshot((doc) => {
+                    let updatedData = Object.entries(doc.data()).sort((a, b) => a[0].localeCompare(b[0]))
+                    dispatch({
+                        type: SUBMIT_SUCCESSFUL,
+                        payload: updatedData
+                    })
+                });
         }
     } catch (error) {
         console.log(error.message)
@@ -162,6 +172,13 @@ export const retrieveStudentList = (sessionId) => {
                 type: RETRIEVING_STUDENTS_LIST_SUCCESS,
                 payload: studentsData
             })
+            dispatch({
+                type: SET_TEACHER_DETAILS,
+                payload: {
+                    teacher: teacherEmail,
+                    currentSession: currentSessionId
+                }
+            })
         } catch (error) {
             dispatch({
                 type: RETRIEVING_STUDENTS_LIST_ERROR,
@@ -181,5 +198,27 @@ export const anonymousLogin = (sessionId) => {
             .catch((error) => {
                 console.log(error.message)
             });
+    }
+}
+
+
+export const studentSync = (text, teacherEmail, currentSession, name) => {
+    return async(dispatch) => {
+        dispatch({
+            type: BEGIN_SYNCING_TEXT
+        })
+        try {
+            await databaseRef.collection(teacherEmail).doc(currentSession).update({
+                [`${name}`]: text
+            })
+            dispatch({
+                type: STUDENT_SYNC_SUCCESS
+            })
+        } catch (error) {
+            dispatch({
+                type: STUDENT_SYNC_ERROR,
+                payload: error.message
+            })
+        }
     }
 }

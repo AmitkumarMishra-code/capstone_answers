@@ -3,7 +3,8 @@ import { useEffect } from "react";
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
-import {  SET_STUDENT_NAME } from "../redux/actions/action_types";
+import { studentSync } from "../redux/actions/actions";
+import { SET_STUDENT_NAME } from "../redux/actions/action_types";
 
 
 const useStyles = makeStyles({
@@ -20,29 +21,34 @@ const useStyles = makeStyles({
 export default function Student() {
     const classes = useStyles()
     const studentName = useSelector(state => state.studentName)
+    const studentSyncState = useSelector(state => state.studentSync)
     const answerRef = useRef()
     const history = useHistory()
     const dispatch = useDispatch()
 
     useEffect(() => {
-        if(studentName.name === ''){
-            if(history.location.state)
-            dispatch({
-                type: SET_STUDENT_NAME,
-                payload: history.location.state.name
-            })
-            else{
+        if (studentName.name === '') {
+            if (history.location.state)
+                dispatch({
+                    type: SET_STUDENT_NAME,
+                    payload: history.location.state.name
+                })
+            else {
                 history.push('/404')
             }
         }
         // eslint-disable-next-line
+    }, [])
+
+    useEffect(() => {
+        
     },[])
 
 
-
-const changeHandler = () => {
-    console.log('change handler called: ' + answerRef.current.value)
-}
+    const changeHandler = () => {
+        console.log('change handler called: ' + answerRef.current.value)
+        dispatch(studentSync(answerRef.current.value, studentName.teacher, studentName.currentSession, studentName.name))
+    }
 
     return (
         <Paper elevation={0} className={classes.studentContainer}>
@@ -56,9 +62,20 @@ const changeHandler = () => {
                 placeholder='Enter your Answer here...'
                 inputRef={answerRef}
                 style={{ width: '100%' }}
-                onChange = {changeHandler}
+                onChange={changeHandler}
             />
-            <Typography variant = 'subtitle2' component = 'p' style ={{fontSize:'14px'}}></Typography>
+            <Typography
+                variant='subtitle2'
+                component='p'
+                style={{ fontSize: '14px' }}
+                color = 'primary'
+            >
+                {
+                    studentSyncState.isSyncing && !studentSyncState.error ? 'Syncing...'
+                        : !studentSyncState.isSyncing && !studentSyncState.error ? 'Sync complete.'
+                            : studentSyncState.error
+                }
+            </Typography>
         </Paper>
     )
 }

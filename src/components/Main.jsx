@@ -1,4 +1,4 @@
-import {Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
+import { Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { endUserSession, logout, setStudentsList } from "../redux/actions/actions";
@@ -173,11 +173,12 @@ export default function Main() {
                                         </Paper>
                                         <Typography
                                             variant='subtitle1'
-                                            component='p'>Students Link:
+                                            component='p'>{`Students Link : `}
                                             <Link
                                                 target="_blank"
                                                 rel="noreferrer noopener"
-                                                href={`${window.location.href}${session.session}`}>
+                                                href={`${window.location.href}${session.session}`}
+                                            >
                                                 {window.location.href}{session.session}
                                             </Link>
                                         </Typography>
@@ -185,13 +186,14 @@ export default function Main() {
                                             {
                                                 students.list.map((student, index) =>
                                                     <Paper className={classes.student} elevation={0} key={index}>
-                                                        <Typography style={{ color: '#4456b7' }}>{student}</Typography>
+                                                        <Typography style={{ color: '#4456b7' }}>{student[0]}</Typography>
                                                         <TextField
                                                             className={classes.studentTextArea}
                                                             variant="outlined"
                                                             multiline
                                                             rows='5'
                                                             color='primary'
+                                                            value={student[1]}
                                                             placeholder={student}
                                                             focused
                                                         />
