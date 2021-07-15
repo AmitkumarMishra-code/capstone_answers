@@ -14,7 +14,6 @@ export const startLogin = () => {
             .signInWithPopup(provider)
             .then(async(result) => {
                 var user = result.user;
-                console.log(user)
                 dispatch({
                     type: LOG_IN_SUCCESSFUL,
                     payload: user
@@ -37,11 +36,6 @@ export async function getUserSessionInformation(email, dispatch) {
     let teacherEmail = email.replaceAll('.', '_')
     try {
         let currentSession = await databaseRef.collection('active_sessions').where('teacher', '==', email).get()
-
-        console.log('printing user session info')
-            // console.log(session.data())
-        console.log(currentSession.size)
-
         dispatch({
             type: RETRIEVE_SESSION_INFORMATION_SUCCESS,
             payload: currentSession.size ? currentSession.docs[0].id : null
@@ -61,7 +55,6 @@ export async function getUserSessionInformation(email, dispatch) {
             })
         }
     } catch (error) {
-        console.log(error.message)
         dispatch({
             type: RETRIEVE_SESSION_INFORMATION_ERROR,
             payload: error.message
@@ -87,14 +80,12 @@ export const logout = () => {
 export const setStudentsList = (list, email) => {
     return async(dispatch) => {
         list.sort()
-        console.log(list)
         dispatch({
             type: IS_SUBMITTING
         })
         let teacherEmail = email.replaceAll('.', '_')
         let studentsObj = {}
         list.forEach(student => studentsObj[`${student}`] = '')
-        console.log(studentsObj)
         try {
             let listId = await databaseRef.collection(teacherEmail).add(studentsObj)
             let sessionId = await databaseRef.collection('active_sessions').add({ teacher: email, currentSession: listId.id })
@@ -158,7 +149,6 @@ export const retrieveStudentList = (sessionId) => {
             let currentSessionId = currentSession.data().currentSession
             let currentSessionDetails = await databaseRef.collection(teacherEmail).doc(currentSessionId).get()
             let studentsData = Object.keys(currentSessionDetails.data()).sort()
-            console.log(studentsData)
             dispatch({
                 type: RETRIEVING_STUDENTS_LIST_SUCCESS,
                 payload: studentsData
