@@ -53,6 +53,12 @@ export default function Students(props) {
         // eslint-disable-next-line
     }, [])
 
+    useEffect(() => {
+        if(studentSession.error){
+            history.push('/404')
+        }
+    },[studentSession.error, history])
+
     
     useEffect(() => {
         firebase.auth().onAuthStateChanged((user) => {
