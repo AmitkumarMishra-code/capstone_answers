@@ -2,17 +2,20 @@ import { Button, Typography, makeStyles, Paper, Fab, TextField, Link, Tooltip } 
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { beginClearingAnswers, endUserSession, logout, setStudentsList } from "../redux/actions/actions";
+import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 
 import LoginLoading from "./LoginLoading";
 import LoginError from "./LoginError";
 
+let theme = createTheme();
+theme = responsiveFontSizes(theme);
 
 const useStyles = makeStyles({
     container: {
         display: 'flex',
         flexDirection: 'column',
         gap: '1rem',
-        width: '100%',
+        maxWidth: '100vw',
         minHeight: '100vh',
         justifyContent: 'flex-start',
         alignItems: 'center',
@@ -40,7 +43,7 @@ const useStyles = makeStyles({
     student: {
         display: 'flex',
         flexDirection: 'column',
-        width: '30%',
+        minWidth: '30%',
         gap: '1rem',
     },
     studentTextArea: {
@@ -121,104 +124,106 @@ export default function Main() {
     }
 
     return (
-        <Paper className={classes.container}>
-            {user.user && <Tooltip title = 'Logout' arrow placement = 'left'><Fab onClick={logoutHandler} className={classes.floating}>
-                <img src={user.user?.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
-            </Fab></Tooltip>}
-            {
-                (user.user && session.isRetrieving) || user.user === undefined ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
-                    <>
-                        {
-                            !session.session && !session.error ?
-                                <>
-                                    <Paper elevation={0} className={classes.alignLeft}>
-                                        <Typography variant='h2' component='h2'>My Students</Typography>
-                                        <Typography variant='h6' component='h6'>Enter the name of each person who will answer your questions, separated by comma, or new line</Typography>
-                                        <TextField
-                                            variant="outlined"
-                                            multiline rows='15'
-                                            color='primary'
-                                            placeholder='e.g. Amit, Francis, Andrew, Nithya'
-                                            inputRef={listRef}
-                                            style={{ width: '100%' }}
-                                        />
-                                        <Paper elevation={0} className={classes.submitDiv}>
-                                            <Button
+        <ThemeProvider theme={theme}>
+            <Paper className={classes.container}>
+                {user.user && <Tooltip title='Logout' arrow placement='left'><Fab onClick={logoutHandler} className={classes.floating}>
+                    <img src={user.user?.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
+                </Fab></Tooltip>}
+                {
+                    (user.user && session.isRetrieving) || user.user === undefined ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
+                        <>
+                            {
+                                !session.session && !session.error ?
+                                    <>
+                                        <Paper elevation={0} className={classes.alignLeft}>
+                                            <Typography variant='h2' component='h2'>My Students</Typography>
+                                            <Typography variant='h6' component='h6'>Enter the name of each person who will answer your questions, separated by comma, or new line</Typography>
+                                            <TextField
+                                                variant="outlined"
+                                                multiline rows='15'
                                                 color='primary'
-                                                variant='contained'
-                                                onClick={submitHandler}
-                                            >
-                                                Submit
-                                            </Button>
-                                            <Typography variant='h6' component='h6'>{students.isSubmitting ? 'Submitting...' : students.error ? students.error : ''}</Typography>
-                                        </Paper>
-                                    </Paper>
-                                </> : session.session && !session.error &&
-                                <>
-                                    <Paper elevation={0} className={classes.alignLeft}>
-                                        <Paper elevation={0} className={classes.dashboardDiv}>
-                                            <Paper elevation={0} className={classes.endSessionDiv}>
-                                                <Typography variant='h2' component='h2' >Dashboard</Typography>
+                                                placeholder='e.g. Amit, Francis, Andrew, Nithya'
+                                                inputRef={listRef}
+                                                style={{ width: '100%' }}
+                                            />
+                                            <Paper elevation={0} className={classes.submitDiv}>
                                                 <Button
-                                                    variant = 'contained'
-                                                    color = 'primary'
-                                                    onClick = {clearAnswersHandler}
-                                                    disabled = {clearAnswers.isClearing || endSession.isEndingSession}
-                                                >
-                                                    Clear Answers
-                                                </Button>
-                                            </Paper>
-                                            <Paper elevation={0} className={classes.endSessionDiv}>
-                                                <Typography
-                                                    variant='subtitle1'
-                                                    component='p'
-                                                >
-                                                    {endSession.isEndingSession && !endSession.error ? 'Ending Session...' : endSession.error}
-                                                    {clearAnswers.isClearing && !clearAnswers.error ? 'Clearing Answers...' : clearAnswers.error}
-                                                </Typography>
-                                                <Button
+                                                    color='primary'
                                                     variant='contained'
-                                                    onClick={endSessionHandler}
-                                                    disabled={clearAnswers.isClearing || endSession.isEndingSession}
+                                                    onClick={submitHandler}
                                                 >
-                                                    End Session
+                                                    Submit
                                                 </Button>
+                                                <Typography variant='h6' component='h6'>{students.isSubmitting ? 'Submitting...' : students.error ? students.error : ''}</Typography>
                                             </Paper>
                                         </Paper>
-                                        <Typography
-                                            variant='subtitle1'
-                                            component='p'>{`Students Link : `}
-                                            <Link
-                                                target="_blank"
-                                                rel="noreferrer noopener"
-                                                href={`${window.location.href}${session.session}`}
-                                            >
-                                                {window.location.href}{session.session}
-                                            </Link>
-                                        </Typography>
-                                        <Paper className={classes.allStudents} elevation={0}>
-                                            {
-                                                students.list.map((student, index) =>
-                                                    <Paper className={classes.student} elevation={0} key={index}>
-                                                        <Typography style={{ color: '#4456b7' }}>{student[0]}</Typography>
-                                                        <TextField
-                                                            className={classes.studentTextArea}
-                                                            variant="outlined"
-                                                            multiline
-                                                            rows='5'
-                                                            color='primary'
-                                                            value={student[1]}
-                                                            placeholder={student[0]}
-                                                            focused
-                                                        />
-                                                    </Paper>)
-                                            }
+                                    </> : session.session && !session.error &&
+                                    <>
+                                        <Paper elevation={0} className={classes.alignLeft}>
+                                            <Paper elevation={0} className={classes.dashboardDiv}>
+                                                <Paper elevation={0} className={classes.endSessionDiv}>
+                                                    <Typography variant='h3' component='h3'>Dashboard</Typography>
+                                                    <Button
+                                                        variant='contained'
+                                                        color='primary'
+                                                        onClick={clearAnswersHandler}
+                                                        disabled={clearAnswers.isClearing || endSession.isEndingSession}
+                                                    >
+                                                        Clear Answers
+                                                    </Button>
+                                                </Paper>
+                                                <Paper elevation={0} className={classes.endSessionDiv}>
+                                                    <Typography
+                                                        variant='subtitle1'
+                                                        component='p'
+                                                    >
+                                                        {endSession.isEndingSession && !endSession.error ? 'Ending Session...' : endSession.error}
+                                                        {clearAnswers.isClearing && !clearAnswers.error ? 'Clearing Answers...' : clearAnswers.error}
+                                                    </Typography>
+                                                    <Button
+                                                        variant='contained'
+                                                        onClick={endSessionHandler}
+                                                        disabled={clearAnswers.isClearing || endSession.isEndingSession}
+                                                    >
+                                                        End Session
+                                                    </Button>
+                                                </Paper>
+                                            </Paper>
+                                            <Typography
+                                                variant='subtitle1'
+                                                component='p'>{`Students Link : `}
+                                                <Link
+                                                    target="_blank"
+                                                    rel="noreferrer noopener"
+                                                    href={`${window.location.href}${session.session}`}
+                                                >
+                                                    {window.location.href}{session.session}
+                                                </Link>
+                                            </Typography>
+                                            <Paper className={classes.allStudents} elevation={0}>
+                                                {
+                                                    students.list.map((student, index) =>
+                                                        <Paper className={classes.student} elevation={0} key={index}>
+                                                            <Typography style={{ color: '#4456b7' }}>{student[0]}</Typography>
+                                                            <TextField
+                                                                className={classes.studentTextArea}
+                                                                variant="outlined"
+                                                                multiline
+                                                                rows='5'
+                                                                color='primary'
+                                                                value={student[1]}
+                                                                placeholder={student[0]}
+                                                                focused
+                                                            />
+                                                        </Paper>)
+                                                }
+                                            </Paper>
                                         </Paper>
-                                    </Paper>
-                                </>
-                        }
-                    </> : <LoginError />
-            }
-        </Paper>
+                                    </>
+                            }
+                        </> : <LoginError />
+                }
+            </Paper>
+        </ThemeProvider>
     )
 }
