@@ -194,7 +194,7 @@ export default function Main() {
                                                             rows='5'
                                                             color='primary'
                                                             value={student[1]}
-                                                            placeholder={student}
+                                                            placeholder={student[0]}
                                                             focused
                                                         />
                                                     </Paper>)
