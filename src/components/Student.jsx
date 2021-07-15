@@ -52,7 +52,7 @@ export default function Student() {
 
     return (
         <Paper elevation={0} className={classes.studentContainer}>
-            <Typography variant='subtitle2' component='p'>{studentName.name}</Typography>
+            <Typography variant='h6' component='p'>{studentName.name}</Typography>
             <Typography variant='h2' component='h2'>My Answer</Typography>
             <Typography variant='subtitle2' component='p'>Enter your answer below. This text is visible to the teacher.</Typography>
             <TextField
