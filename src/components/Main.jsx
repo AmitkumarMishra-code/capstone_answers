@@ -1,4 +1,4 @@
-import { Button, Typography, makeStyles, Paper, Fab, TextField, Link } from "@material-ui/core"
+import { Button, Typography, makeStyles, Paper, Fab, TextField, Link, Tooltip } from "@material-ui/core"
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { beginClearingAnswers, endUserSession, logout, setStudentsList } from "../redux/actions/actions";
@@ -122,9 +122,9 @@ export default function Main() {
 
     return (
         <Paper className={classes.container}>
-            {user.user && <Fab onClick={logoutHandler} className={classes.floating}>
+            {user.user && <Tooltip title = 'Logout' arrow placement = 'left'><Fab onClick={logoutHandler} className={classes.floating}>
                 <img src={user.user?.photoURL} alt='' style={{ borderRadius: '50%', width: '100%' }} />
-            </Fab>}
+            </Fab></Tooltip>}
             {
                 (user.user && session.isRetrieving) || user.user === undefined ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
                     <>
