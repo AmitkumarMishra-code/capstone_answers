@@ -92,11 +92,6 @@ export default function Main() {
         unsubscribe()
     }
 
-    // useEffect(() => {
-    //     return () => unsubscribe()
-    //     // eslint-disable-next-line
-    // },[])
-
     const submitHandler = () => {
         if (listRef.current.value.trim().length === 0) {
             alert('Students list cannot be empty! Please try again!')
@@ -133,7 +128,6 @@ export default function Main() {
             {
                 (user.user && session.isRetrieving) || user.user === undefined ? <LoginLoading /> : user.user && !session.isRetrieving && !session.error ?
                     <>
-
                         {
                             !session.session && !session.error ?
                                 <>
