@@ -197,7 +197,7 @@ export default function Main() {
                                                 <Link
                                                     target="_blank"
                                                     rel="noreferrer noopener"
-                                                    href={`${window.location.href}${session.session}`}
+                                                    // href={`${window.location.href}${session.session}`}
                                                 >
                                                     {window.location.href}{session.session}
                                                 </Link>
