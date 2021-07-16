@@ -64,12 +64,14 @@ const useStyles = makeStyles({
         alignItems: 'center',
         width: '95%',
         marginTop: '25px',
+        flexWrap:'wrap',
     },
     endSessionDiv: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         gap: '50px',
+        flexWrap:'wrap',
     },
 });
 
