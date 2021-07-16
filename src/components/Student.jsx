@@ -18,10 +18,11 @@ const useStyles = makeStyles({
     },
 });
 
-export default function Student() {
+export default function Student(props) {
     const classes = useStyles()
     const studentName = useSelector(state => state.studentName)
     const studentSyncState = useSelector(state => state.studentSync)
+    const question = useSelector(state => state.question)
     const answerRef = useRef()
     const history = useHistory()
     const dispatch = useDispatch()
@@ -41,7 +42,8 @@ export default function Student() {
     }, [])
 
     useEffect(() => {
-        dispatch(linkStudent(answerRef, studentName.teacher, studentName.currentSession, studentName.name))
+        console.log(props.match.params.id)
+        dispatch(linkStudent(answerRef, studentName.teacher, studentName.currentSession, studentName.name, props.match.params.id))
         // eslint-disable-next-line
     },[])
 
@@ -53,6 +55,7 @@ export default function Student() {
     return (
         <Paper elevation={0} className={classes.studentContainer}>
             <Typography variant='h6' component='p'>{studentName.name}</Typography>
+            <Typography variant = 'h4' component = 'p'>Current Question: <span style = {{color: 'red'}}>{question}</span></Typography>
             <Typography variant='h2' component='h2'>My Answer</Typography>
             <Typography variant='subtitle2' component='p'>Enter your answer below. This text is visible to the teacher.</Typography>
             <TextField

@@ -52,3 +52,7 @@ export const STUDENT_SYNC_ERROR = 'STUDENT_SYNC_ERROR';
 
 //to unsubscribe to firestore listener
 export const ADD_LISTENER = 'ADD_LISTENER';
+
+//questions
+export const SET_QUESTION = 'SET_QUESTION';
+export const RESET_QUESTION = 'RESET_QUESTION';

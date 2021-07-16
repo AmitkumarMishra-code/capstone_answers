@@ -1,7 +1,7 @@
 import { Button, Typography, makeStyles, Paper, Fab, TextField, Link, Tooltip } from "@material-ui/core"
 import { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { beginClearingAnswers, endUserSession, logout, setStudentsList } from "../redux/actions/actions";
+import { askQuestion, beginClearingAnswers, endUserSession, logout, setStudentsList } from "../redux/actions/actions";
 import { createTheme, responsiveFontSizes, ThemeProvider } from '@material-ui/core/styles';
 
 import LoginLoading from "./LoginLoading";
@@ -64,14 +64,21 @@ const useStyles = makeStyles({
         alignItems: 'center',
         width: '95%',
         marginTop: '25px',
-        flexWrap:'wrap',
+        flexWrap: 'wrap',
     },
     endSessionDiv: {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
         gap: '50px',
-        flexWrap:'wrap',
+        flexWrap: 'wrap',
+    },
+    askQuestionDiv: {
+        display: 'flex',
+        justifyContent: 'flex-start',
+        alignItems: 'center',
+        gap: '1rem',
+        width: '100%',
     },
 });
 
@@ -85,6 +92,7 @@ export default function Main() {
     const clearAnswers = useSelector(state => state.clearAnswers)
     const unsubscribe = useSelector(state => state.listener)
     const listRef = useRef()
+    const questionRef = useRef()
 
 
     const logoutHandler = () => {
@@ -122,7 +130,14 @@ export default function Main() {
     }
 
     const clearAnswersHandler = () => {
+        questionRef.current.value = ''
         dispatch(beginClearingAnswers(user.user.email))
+    }
+
+    const askQuestionHandler = () => {
+        if (questionRef.current.value.trim().length) {
+            dispatch(askQuestion(user.user.email, questionRef.current.value, session.session))
+        }
     }
 
     return (
@@ -197,11 +212,16 @@ export default function Main() {
                                                 <Link
                                                     target="_blank"
                                                     rel="noreferrer noopener"
-                                                    // href={`${window.location.href}${session.session}`}
+                                                // href={`${window.location.href}${session.session}`}
                                                 >
                                                     {window.location.href}{session.session}
                                                 </Link>
                                             </Typography>
+                                            <Paper className={classes.askQuestionDiv} elevation={0}>
+                                                <Typography variant='h4' component='p'>Question :</Typography>
+                                                <TextField variant='outlined' color='primary' style={{ width: '70%' }} inputRef={questionRef} />
+                                                <Button variant='contained' color='primary' onClick={askQuestionHandler}>Ask</Button>
+                                            </Paper>
                                             <Paper className={classes.allStudents} elevation={0}>
                                                 {
                                                     students.list.map((student, index) =>
